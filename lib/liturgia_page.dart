@@ -3,6 +3,29 @@ import 'package:http/http.dart' as http;
 import 'dart:convert' show json;
 import 'package:intl/intl.dart';
 
+class DiaSemana {
+  final DateTime data;
+
+  DiaSemana(String dataStr)
+      : data = DateFormat('dd/MM/yyyy').parse(dataStr);
+
+  String diaDaSemana() {
+    // Lista com os dias da semana em português
+    final List<String> diasDaSemana = [
+      'Domingo',
+      'Segunda-feira',
+      'Terça-feira',
+      'Quarta-feira',
+      'Quinta-feira',
+      'Sexta-feira',
+      'Sábado'
+    ];
+
+    // Retorna o nome do dia da semana correspondente
+    return diasDaSemana[data.weekday % 7];
+  }
+}
+
 class LiturgiaPage extends StatefulWidget {
   @override
   _LiturgiaPageState createState() => _LiturgiaPageState();
@@ -10,9 +33,9 @@ class LiturgiaPage extends StatefulWidget {
 
 class _LiturgiaPageState extends State<LiturgiaPage> {
   DateTime selectedDate = DateTime.now();
-  Map<String, dynamic>? liturgiaData; // Permitir que seja nulo inicialmente
+  Map<String, dynamic>? liturgiaData;
   bool isLoading = true;
-  final DateFormat dateFormat = DateFormat('dd/MM/yyyy'); // Formato brasileiro
+  final DateFormat dateFormat = DateFormat('dd/MM/yyyy');
 
   @override
   void initState() {
@@ -25,7 +48,7 @@ class _LiturgiaPageState extends State<LiturgiaPage> {
       isLoading = true;
     });
 
-    final String formattedDate = dateFormat.format(date); // Formata a data
+    final String formattedDate = dateFormat.format(date);
     print("Data formatada: $formattedDate");
 
     final int dia = date.day;
@@ -37,7 +60,6 @@ class _LiturgiaPageState extends State<LiturgiaPage> {
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
 
-      // Verificando o conteúdo dos dados recebidos
       print("Liturgia Data: $data");
 
       setState(() {
@@ -47,9 +69,9 @@ class _LiturgiaPageState extends State<LiturgiaPage> {
     } else {
       setState(() {
         isLoading = false;
-        liturgiaData = null; // Definir como nulo se a solicitação falhar
+        liturgiaData = null;
       });
-      throw Exception('Failed to load liturgy');
+      throw Exception('Falha ao carregar a liturgia');
     }
   }
 
@@ -69,6 +91,38 @@ class _LiturgiaPageState extends State<LiturgiaPage> {
     }
   }
 
+Widget _buildLiturgiaHeader() {
+  final String corLiturgia = liturgiaData?['cor'] ?? 'Cor não disponível';
+  final String tempoSemana = liturgiaData?['liturgia'] ?? 'Liturgia não disponível';
+  final String dataLeitura = liturgiaData?['data'] ?? 'Data não disponível';
+
+  // Converte a data para o dia da semana
+  String diaSemana = DiaSemana(dataLeitura).diaDaSemana();
+
+  return Container(
+    padding: const EdgeInsets.all(16.0),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.center,  // Centraliza todos os textos
+      children: [
+        Text(
+          dataLeitura,
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),
+        ),
+        Text(
+          'Cor Litúrgica: $corLiturgia',
+          style: TextStyle(fontSize: 14, color: Colors.black),
+        ),
+        SizedBox(height: 8),
+        Text(
+          '$tempoSemana | $diaSemana',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),
+        ),
+      ],
+    ),
+  );
+}
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -87,7 +141,7 @@ class _LiturgiaPageState extends State<LiturgiaPage> {
                   length: _getTabCount(),
                   child: Column(
                     children: [
-                      _buildLiturgiaHeader(), // Adiciona o cabeçalho
+                      _buildLiturgiaHeader(),
                       TabBar(
                         tabs: _buildTabs(),
                       ),
@@ -105,50 +159,11 @@ class _LiturgiaPageState extends State<LiturgiaPage> {
     );
   }
 
-Widget _buildLiturgiaHeader() {
-  final String corLiturgia = liturgiaData?['cor'] ?? 'Cor não disponível';
-  final String tempoSemana = liturgiaData?['liturgia'] ?? 'Liturgia não disponível';
-  final String dataLeitura = liturgiaData?['data'] ?? 'Data não disponível';
-  final String diaSemana = liturgiaData?['data'] ?? 'Data não disponível';
-
-  return Container(
-    padding: const EdgeInsets.all(16.0),
-    color: Colors.grey[200],
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          dataLeitura,
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),
-        ),
-        Text(
-          'Cor Litúrgica: $corLiturgia',
-          
-        ),
-        SizedBox(height: 8),
-        Text(
-          '$tempoSemana | $diaSemana',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),
-        ),
-      ],
-    ),
-  );
-}
-
-DateTime? _parseDate(String dateString) {
-  try {
-    return DateFormat('dd/MM/yyyy').parse(dateString);
-  } catch (e) {
-    return null;
-  }
-}
-
   int _getTabCount() {
-    if (liturgiaData == null) return 0; // Retorna 0 se liturgiaData for nulo
-    int count = 3; // 1 Leitura, Salmo, Evangelho
+    if (liturgiaData == null) return 0;
+    int count = 3;
 
-    // Verifique se 'segundaLeitura' não é uma string vazia ou a mensagem padrão de ausência de segunda leitura
-    if (liturgiaData!.containsKey('segundaLeitura') && 
+    if (liturgiaData!.containsKey('segundaLeitura') &&
         liturgiaData!['segundaLeitura'] != null &&
         liturgiaData!['segundaLeitura'] is Map &&
         liturgiaData!['segundaLeitura']['texto'] != 'Não há segunda leitura hoje!') {
@@ -165,7 +180,7 @@ DateTime? _parseDate(String dateString) {
       Tab(text: 'EVANGELHO'),
     ];
 
-    if (_getTabCount() == 4) { // Se houver segunda leitura, insira após o Salmo
+    if (_getTabCount() == 4) {
       tabs.insert(1, Tab(text: '2 LEITURA'));
     }
 
@@ -180,7 +195,7 @@ DateTime? _parseDate(String dateString) {
       _buildEvangelhoView(),
     ];
 
-    if (_getTabCount() == 4) { // Se houver segunda leitura, insira após o Salmo
+    if (_getTabCount() == 4) {
       views.insert(1, _buildLeituraView('segundaLeitura'));
     }
 
