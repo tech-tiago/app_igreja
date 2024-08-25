@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:maps_launcher/maps_launcher.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'liturgia_page.dart';
@@ -114,7 +114,7 @@ class HomePageContent extends StatelessWidget {
           'PARÓQUIA NOSSA SENHORA DA SAÚDE',
           'Domingo: 08:30 horas • 10:00 horas • 19:30 horas',
           'Quinta-feira: 18:00 horas',
-          LatLng(-16.40445, -39.05224),
+          LatLng(-16.40452, -39.05223),
         ),
         buildCard(
           'COMUNIDADE SANTO ANTÔNIO',
@@ -187,11 +187,18 @@ class HomePageContent extends StatelessWidget {
                     ],
                   ),
                 ),
-                Positioned.fill(
-                  child: GestureDetector(
-                    onTap: () => _launchURL(location.latitude, location.longitude),
-                    child: Container(
-                      color: Colors.transparent, // Camada transparente para capturar os toques
+                Positioned(
+                  bottom: 10,
+                  right: 10,
+                  child: ElevatedButton.icon(
+                    onPressed: () => _launchURL(location.latitude, location.longitude),
+                    icon: Icon(Icons.map),
+                    label: Text("Abrir no Maps"),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blueAccent,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
                     ),
                   ),
                 ),
@@ -203,44 +210,7 @@ class HomePageContent extends StatelessWidget {
     );
   }
 
-void _launchURL(double lat, double lng) async {
-  final googleMapsUrl = Uri.parse('https://www.google.com/maps/search/?api=1&query=$lat,$lng');
-  if (await canLaunchUrl(googleMapsUrl)) {
-    await launchUrl(googleMapsUrl);
-  } else {
-    throw 'Could not launch $googleMapsUrl';
+  void _launchURL(double lat, double lng) {
+    MapsLauncher.launchCoordinates(lat, lng, 'Localização');
   }
 }
-}
-
-  BottomNavigationBar buildBottomNavigationBar() {
-    return BottomNavigationBar(
-      items: const [
-        BottomNavigationBarItem(
-          icon: FaIcon(FontAwesomeIcons.clock),
-          label: 'Horários',
-        ),
-        BottomNavigationBarItem(
-          icon: FaIcon(FontAwesomeIcons.bookOpen),
-          label: 'Liturgia',
-        ),
-        BottomNavigationBarItem(
-          icon: FaIcon(FontAwesomeIcons.users),
-          label: 'Pastorais',
-        ),
-        BottomNavigationBarItem(
-          icon: FaIcon(FontAwesomeIcons.handsPraying),
-          label: 'Orações',
-        ),
-        BottomNavigationBarItem(
-          icon: FaIcon(FontAwesomeIcons.circleInfo),
-          label: 'Sobre',
-        ),
-      ],
-      selectedItemColor: const Color(0xFFB0C4DE),
-      unselectedItemColor: const Color(0xFFB0C4DE).withOpacity(0.4),
-      backgroundColor: const Color(0xFF003F4F),
-      type: BottomNavigationBarType.fixed,
-    );
-  }
-  

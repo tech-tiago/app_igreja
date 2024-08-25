@@ -348,44 +348,46 @@ class _LiturgiaPageState extends State<LiturgiaPage> {
   }
 
   int _getTabCount() {
-    if (liturgiaData == null) return 0;
     int count = 3;
 
-    if (liturgiaData!.containsKey('segundaLeitura') &&
+    if (liturgiaData != null &&
+        liturgiaData!.containsKey('segundaLeitura') &&
         liturgiaData!['segundaLeitura'] != null &&
         liturgiaData!['segundaLeitura'] is Map &&
         liturgiaData!['segundaLeitura']['texto'] != 'Não há segunda leitura hoje!') {
       count = 4;
     }
+
     return count;
   }
 
-  List<Widget> _buildTabs() {
-    if (liturgiaData == null) return [];
-    List<Widget> tabs = [
-      Tab(text: '1 LEITURA'),
-      Tab(text: 'SALMO'),
-      Tab(text: 'EVANGELHO'),
-    ];
+List<Widget> _buildTabs() {
+  List<Widget> tabs = [
+    Tab(child: Text('1 LEITURA', style: TextStyle(fontSize: 10))),
+    Tab(child: Text('SALMO', style: TextStyle(fontSize: 10))),
+  ];
 
-    if (_getTabCount() == 4) {
-      tabs.insert(1, Tab(text: '2 LEITURA'));
-    }
-
-    return tabs;
+  if (_getTabCount() == 4) {
+    tabs.add(Tab(child: Text('2 LEITURA', style: TextStyle(fontSize: 10))));
   }
 
+  tabs.add(Tab(child: Text('EVANGELHO', style: TextStyle(fontSize: 10))));
+
+  return tabs;
+}
+
+
   List<Widget> _buildTabViews() {
-    if (liturgiaData == null) return [];
     List<Widget> views = [
       _buildLeituraView('primeiraLeitura'),
       _buildSalmoView(),
-      _buildEvangelhoView(),
     ];
 
     if (_getTabCount() == 4) {
-      views.insert(1, _buildLeituraView('segundaLeitura'));
+      views.add(_buildLeituraView('segundaLeitura'));
     }
+
+    views.add(_buildEvangelhoView());
 
     return views;
   }
