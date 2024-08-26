@@ -48,7 +48,7 @@ class _LiturgiaPageState extends State<LiturgiaPage> {
       isLoading = true;
     });
 
-    final String formattedDate = dateFormat.format(date);
+
     final int dia = date.day;
     final int mes = date.month;
     final response = await http.get(
