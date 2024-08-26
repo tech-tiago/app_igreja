@@ -7,6 +7,9 @@ import 'liturgia_page.dart';
 import 'pastorais_page.dart';
 import 'oracoes_page.dart';
 import 'sobre_page.dart';
+import 'dizimo_page.dart';
+import 'secretaria_page.dart';
+import 'loja_page.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -15,6 +18,9 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   int _currentIndex = 0;
+  bool _showDizimoPage = false;
+  bool _showSecretariaPage = false;
+  bool _showLojaPage = false;
 
   final List<Widget> _pages = [
     HomePageContent(),
@@ -23,6 +29,39 @@ class _HomePageState extends State<HomePage> {
     OracoesPage(),
     SobrePage(),
   ];
+
+  void _onTabTapped(int index) {
+    setState(() {
+      _currentIndex = index;
+      _showDizimoPage = false;
+      _showSecretariaPage = false;
+      _showLojaPage = false; // Reseta a exibição da LojaPage
+    });
+  }
+
+  void _showDizimo() {
+    setState(() {
+      _showDizimoPage = true;
+      _showSecretariaPage = false;
+      _showLojaPage = false;
+    });
+  }
+
+  void _showSecretaria() {
+    setState(() {
+      _showSecretariaPage = true;
+      _showDizimoPage = false;
+      _showLojaPage = false;
+    });
+  }
+
+  void _showLoja() {
+    setState(() {
+      _showLojaPage = true;
+      _showDizimoPage = false;
+      _showSecretariaPage = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,66 +79,78 @@ class _HomePageState extends State<HomePage> {
         ),
         actions: [
           IconButton(
-            icon: const FaIcon(FontAwesomeIcons.video),
-            color: const Color.fromARGB(255, 239, 225, 198),
-            onPressed: () {},
-          ),
-          IconButton(
             icon: const FaIcon(FontAwesomeIcons.phone),
-            color: const Color.fromARGB(255, 239, 225, 198),
-            onPressed: () {},
+            color: _showSecretariaPage
+                ? const Color(0xFFB0C4DE)
+                : const Color.fromARGB(255, 239, 225, 198),
+            onPressed: _showSecretaria, // Chama a função para mostrar a SecretariaPage
           ),
           IconButton(
             icon: const FaIcon(FontAwesomeIcons.handHoldingHeart),
-            color: const Color.fromARGB(255, 239, 225, 198),
-            onPressed: () {},
+            color: _showDizimoPage
+                ? const Color(0xFFB0C4DE)
+                : const Color.fromARGB(255, 239, 225, 198),
+            onPressed: _showDizimo, // Chama a função para mostrar a DizimoPage
           ),
           IconButton(
             icon: const FaIcon(FontAwesomeIcons.shop),
-            color: const Color.fromARGB(255, 239, 225, 198),
-            onPressed: () {},
+            color: _showLojaPage
+                ? const Color(0xFFB0C4DE)
+                : const Color.fromARGB(255, 239, 225, 198),
+            onPressed: _showLoja, // Chama a função para mostrar a LojaPage
           ),
         ],
       ),
-      body: _pages[_currentIndex],
-      bottomNavigationBar: buildBottomNavigationBar(),
-    );
-  }
-
-  BottomNavigationBar buildBottomNavigationBar() {
-    return BottomNavigationBar(
-      currentIndex: _currentIndex,
-      onTap: (index) {
-        setState(() {
-          _currentIndex = index;
-        });
-      },
-      items: const [
-        BottomNavigationBarItem(
-          icon: FaIcon(FontAwesomeIcons.clock),
-          label: 'Horários',
-        ),
-        BottomNavigationBarItem(
-          icon: FaIcon(FontAwesomeIcons.bookOpen),
-          label: 'Liturgia',
-        ),
-        BottomNavigationBarItem(
-          icon: FaIcon(FontAwesomeIcons.users),
-          label: 'Pastorais',
-        ),
-        BottomNavigationBarItem(
-          icon: FaIcon(FontAwesomeIcons.handsPraying),
-          label: 'Orações',
-        ),
-        BottomNavigationBarItem(
-          icon: FaIcon(FontAwesomeIcons.circleInfo),
-          label: 'Sobre',
-        ),
-      ],
-      selectedItemColor: const Color(0xFFB0C4DE),
-      unselectedItemColor: const Color(0xFFB0C4DE).withOpacity(0.4),
-      backgroundColor: const Color(0xFF003F4F),
-      type: BottomNavigationBarType.fixed,
+      body: _showDizimoPage
+          ? DizimoPage()
+          : _showSecretariaPage
+              ? SecretariaPage()
+              : _showLojaPage
+                  ? LojaPage()
+                  : _pages[_currentIndex],
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currentIndex,
+        onTap: (index) {
+          if (_showDizimoPage || _showSecretariaPage || _showLojaPage) {
+            setState(() {
+              _showDizimoPage = false;
+              _showSecretariaPage = false;
+              _showLojaPage = false;
+              _currentIndex = index;
+            });
+          } else {
+            _onTabTapped(index);
+          }
+        },
+        items: const [
+          BottomNavigationBarItem(
+            icon: FaIcon(FontAwesomeIcons.clock),
+            label: 'Horários',
+          ),
+          BottomNavigationBarItem(
+            icon: FaIcon(FontAwesomeIcons.bookOpen),
+            label: 'Liturgia',
+          ),
+          BottomNavigationBarItem(
+            icon: FaIcon(FontAwesomeIcons.users),
+            label: 'Pastorais',
+          ),
+          BottomNavigationBarItem(
+            icon: FaIcon(FontAwesomeIcons.handsPraying),
+            label: 'Orações',
+          ),
+          BottomNavigationBarItem(
+            icon: FaIcon(FontAwesomeIcons.circleInfo),
+            label: 'Sobre',
+          ),
+        ],
+        selectedItemColor: (_showDizimoPage || _showSecretariaPage || _showLojaPage)
+            ? const Color(0xFFB0C4DE).withOpacity(0.4)
+            : const Color(0xFFB0C4DE),
+        unselectedItemColor: const Color(0xFFB0C4DE).withOpacity(0.4),
+        backgroundColor: const Color(0xFF003F4F),
+        type: BottomNavigationBarType.fixed,
+      ),
     );
   }
 }
@@ -206,6 +257,7 @@ class HomePageContent extends StatelessWidget {
             ),
           ],
         ),
+      
       ),
     );
   }
