@@ -5,7 +5,7 @@
         android:name="android.permission.INTERNET"/>
 
     <application
-        android:label="app_igreja"
+        android:label="Nossa Sra. da Saúde"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
 
