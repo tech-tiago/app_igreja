@@ -34,3 +34,4 @@ flutter:
 
   assets:
     - assets/images/logo.png
+    - assets/images/load_img.png
