@@ -35,7 +35,7 @@ class _LiturgiaPageState extends State<LiturgiaPage> {
   Map<String, dynamic>? liturgiaData;
   bool isLoading = true;
   final DateFormat dateFormat = DateFormat('dd/MM/yyyy');
-  double fontSize = 16.0; // Tamanho inicial do texto
+  double _fontSize = 16.0; // Tamanho inicial da fonte
 
   @override
   void initState() {
@@ -47,7 +47,6 @@ class _LiturgiaPageState extends State<LiturgiaPage> {
     setState(() {
       isLoading = true;
     });
-
 
     final int dia = date.day;
     final int mes = date.month;
@@ -70,33 +69,23 @@ class _LiturgiaPageState extends State<LiturgiaPage> {
     }
   }
 
-  Future<void> _selectDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: selectedDate,
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2101),
-    );
+Future<void> _selectDate(BuildContext context) async {
+  final DateTime? picked = await showDatePicker(
+    context: context,
+    initialDate: selectedDate,
+    firstDate: DateTime(2000),
+    lastDate: DateTime(2101),
+    locale: const Locale('pt', 'BR'), // Define a localidade para PT-BR
+  );
 
-    if (picked != null && picked != selectedDate) {
-      setState(() {
-        selectedDate = picked;
-      });
-      _fetchLiturgiaData(selectedDate);
-    }
-  }
-
-  void _zoomIn() {
+  if (picked != null && picked != selectedDate) {
     setState(() {
-      fontSize += 2;
+      selectedDate = picked;
     });
+    _fetchLiturgiaData(selectedDate);
   }
+}
 
-  void _zoomOut() {
-    setState(() {
-      if (fontSize > 10) fontSize -= 2;
-    });
-  }
 
   void _shareText(String text) {
     Share.share(text);
@@ -171,21 +160,21 @@ class _LiturgiaPageState extends State<LiturgiaPage> {
             ),
             Text(
               '$titulo ($referencia)',
-              style: TextStyle(fontSize: fontSize + 4, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: _fontSize + 4, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 10),
             Text(
               texto,
-              style: TextStyle(fontSize: fontSize),
+              style: TextStyle(fontSize: _fontSize),
             ),
             SizedBox(height: 20),
             Text(
               '- Palavra do Senhor.',
-              style: TextStyle(fontSize: fontSize, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: _fontSize, fontWeight: FontWeight.bold),
             ),
             Text(
               '- Graças a Deus.',
-              style: TextStyle(fontSize: fontSize, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: _fontSize, fontWeight: FontWeight.bold),
             ),
           ],
         ),
@@ -227,17 +216,17 @@ class _LiturgiaPageState extends State<LiturgiaPage> {
             ),
             Text(
               'Responsório ($referencia)',
-              style: TextStyle(fontSize: fontSize + 4, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: _fontSize + 4, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 10),
             Text(
               '— $refrao',
-              style: TextStyle(fontSize: fontSize, fontStyle: FontStyle.italic),
+              style: TextStyle(fontSize: _fontSize, fontStyle: FontStyle.italic),
             ),
             SizedBox(height: 10),
             Text(
               texto,
-              style: TextStyle(fontSize: fontSize),
+              style: TextStyle(fontSize: _fontSize),
             ),
           ],
         ),
@@ -279,21 +268,21 @@ class _LiturgiaPageState extends State<LiturgiaPage> {
             ),
             Text(
               '$titulo ($referencia)',
-              style: TextStyle(fontSize: fontSize + 4, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: _fontSize + 4, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 10),
             Text(
               texto,
-              style: TextStyle(fontSize: fontSize),
+              style: TextStyle(fontSize: _fontSize),
             ),
             SizedBox(height: 20),
             Text(
               '- Palavra da Salvação.',
-              style: TextStyle(fontSize: fontSize, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: _fontSize, fontWeight: FontWeight.bold),
             ),
             Text(
               '- Glória a vós, Senhor.',
-              style: TextStyle(fontSize: fontSize, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: _fontSize, fontWeight: FontWeight.bold),
             ),
           ],
         ),
@@ -309,14 +298,6 @@ class _LiturgiaPageState extends State<LiturgiaPage> {
       appBar: AppBar(
         actions: [
           IconButton(
-            icon: Icon(Icons.zoom_in),
-            onPressed: _zoomIn,
-          ),
-          IconButton(
-            icon: Icon(Icons.zoom_out),
-            onPressed: _zoomOut,
-          ),
-          IconButton(
             icon: Icon(Icons.calendar_today),
             onPressed: () => _selectDate(context),
           ),
@@ -325,21 +306,39 @@ class _LiturgiaPageState extends State<LiturgiaPage> {
       body: isLoading
           ? Center(child: CircularProgressIndicator())
           : liturgiaData != null
-              ? DefaultTabController(
-                  length: _getTabCount(),
-                  child: Column(
-                    children: [
-                      _buildLiturgiaHeader(),
-                      TabBar(
-                        tabs: _buildTabs(),
-                      ),
-                      Expanded(
-                        child: TabBarView(
-                          children: _buildTabViews(),
+              ? Column(
+                  children: [
+                    _buildLiturgiaHeader(),
+                    Expanded(
+                      child: DefaultTabController(
+                        length: _getTabCount(),
+                        child: Column(
+                          children: [
+                            TabBar(
+                              tabs: _buildTabs(),
+                            ),
+                            Slider(
+                              value: _fontSize,
+                              min: 12.0,
+                              max: 24.0,
+                              divisions: 6,
+                              label: _fontSize.round().toString(),
+                              onChanged: (value) {
+                                setState(() {
+                                  _fontSize = value;
+                                });
+                              },
+                            ),
+                            Expanded(
+                              child: TabBarView(
+                                children: _buildTabViews(),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 )
               : Center(
                   child: Text('No data available for the selected date.'),
@@ -361,21 +360,20 @@ class _LiturgiaPageState extends State<LiturgiaPage> {
     return count;
   }
 
-List<Widget> _buildTabs() {
-  List<Widget> tabs = [
-    Tab(child: Text('1 LEITURA', style: TextStyle(fontSize: 10))),
-    Tab(child: Text('SALMO', style: TextStyle(fontSize: 10))),
-  ];
+  List<Widget> _buildTabs() {
+    List<Widget> tabs = [
+      Tab(child: Text('1 LEITURA', style: TextStyle(fontSize: 10))),
+      Tab(child: Text('SALMO', style: TextStyle(fontSize: 10))),
+    ];
 
-  if (_getTabCount() == 4) {
-    tabs.add(Tab(child: Text('2 LEITURA', style: TextStyle(fontSize: 10))));
+    if (_getTabCount() == 4) {
+      tabs.add(Tab(child: Text('2 LEITURA', style: TextStyle(fontSize: 10))));
+    }
+
+    tabs.add(Tab(child: Text('EVANGELHO', style: TextStyle(fontSize: 10))));
+
+    return tabs;
   }
-
-  tabs.add(Tab(child: Text('EVANGELHO', style: TextStyle(fontSize: 10))));
-
-  return tabs;
-}
-
 
   List<Widget> _buildTabViews() {
     List<Widget> views = [
