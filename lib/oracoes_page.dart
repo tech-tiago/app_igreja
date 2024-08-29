@@ -20,7 +20,7 @@ class _OracoesPageState extends State<OracoesPage> {
 
   Future<void> _fetchOracoesData() async {
     final String url =
-        'https://drive.google.com/uc?export=download&id=1bJfo9uwClo4XHkXntuUiAmcfGwER_Ynj'; // Substitua com o link correto
+        'https://drive.google.com/uc?export=download&id=1bJfo9uwClo4XHkXntuUiAmcfGwER_Ynj';
 
     try {
       final response = await http.get(Uri.parse(url));
