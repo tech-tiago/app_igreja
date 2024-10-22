@@ -4,7 +4,7 @@ import 'package:maps_launcher/maps_launcher.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'liturgia_page.dart';
-import 'pastorais_page.dart';
+import 'biblia_page.dart';
 import 'oracoes_page.dart';
 import 'sobre_page.dart';
 import 'dizimo_page.dart';
@@ -25,7 +25,7 @@ class _HomePageState extends State<HomePage> {
   final List<Widget> _pages = [
     HomePageContent(),
     LiturgiaPage(),
-    PastoraisPage(),
+    BibliaPage(),
     OracoesPage(),
     SobrePage(),
   ];
@@ -132,8 +132,8 @@ class _HomePageState extends State<HomePage> {
             label: 'Liturgia',
           ),
           BottomNavigationBarItem(
-            icon: FaIcon(FontAwesomeIcons.users),
-            label: 'Pastorais',
+            icon: FaIcon(FontAwesomeIcons.bookBible),
+            label: 'Bíblia',
           ),
           BottomNavigationBarItem(
             icon: FaIcon(FontAwesomeIcons.handsPraying),
@@ -185,28 +185,56 @@ class HomePageContent extends StatelessWidget {
 
   Widget buildCard(String title, String massSchedule, String adorationSchedule, LatLng location) {
     return Card(
-      margin: const EdgeInsets.symmetric(vertical: 10.0),
+      margin: const EdgeInsets.symmetric(vertical: 12.0),
+      elevation: 4,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(15),
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(18.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               title,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.teal,
+              ),
             ),
             const SizedBox(height: 10),
             const Text(
               'Horários de Missas:',
-              style: TextStyle(fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
+              ),
             ),
-            Text(massSchedule),
+            Text(
+              massSchedule,
+              style: const TextStyle(
+                fontSize: 16,
+                color: Colors.black54,
+              ),
+            ),
             const SizedBox(height: 10),
             const Text(
               'Adoração:',
-              style: TextStyle(fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
+              ),
             ),
-            Text(adorationSchedule),
+            Text(
+              adorationSchedule,
+              style: const TextStyle(
+                fontSize: 16,
+                color: Colors.black54,
+              ),
+            ),
             const SizedBox(height: 20),
             Stack(
               children: [
@@ -257,7 +285,6 @@ class HomePageContent extends StatelessWidget {
             ),
           ],
         ),
-      
       ),
     );
   }
