@@ -10,13 +10,13 @@ class BibliaPage extends StatefulWidget {
 
 class _BibliaPageState extends State<BibliaPage> {
   Map<String, dynamic>? bibliaData;
-  String? selectedTestamento = 'antigoTestamento'; // Novo: Armazena o testamento selecionado
+  String? selectedTestamento = 'antigoTestamento';
   String? selectedNome;
   int? selectedCapitulo;
   int? selectedVersiculoInicial; 
   int? selectedVersiculoFinal; 
   bool isLoading = true;
-  double _fontSize = 16.0; 
+  double _fontSize = 16.0;
 
   @override
   void initState() {
@@ -30,7 +30,7 @@ class _BibliaPageState extends State<BibliaPage> {
       final data = json.decode(response);
 
       setState(() {
-        bibliaData = data; // Armazena ambos os testamentos
+        bibliaData = data;
         selectedNome = bibliaData![selectedTestamento!]!.first['nome'];
         selectedCapitulo = 1;
         selectedVersiculoInicial = 1; 
@@ -46,7 +46,7 @@ class _BibliaPageState extends State<BibliaPage> {
   }
 
   List<dynamic> _getLivros() {
-    return bibliaData![selectedTestamento!]; // Retorna os livros do testamento selecionado
+    return bibliaData![selectedTestamento!];
   }
 
   List<int> _getCapitulos() {
@@ -89,10 +89,10 @@ class _BibliaPageState extends State<BibliaPage> {
         String texto = '';
         for (var versiculo in versiculos) {
           if (versiculo['versiculo'] >= selectedVersiculoInicial! && versiculo['versiculo'] <= selectedVersiculoFinal!) {
-            texto += '${versiculo['texto']} \n'; // Adiciona o texto do versículo ao resultado
+            texto += '${versiculo['texto']} \n';
           }
         }
-        return texto.trim(); // Retorna o texto formatado
+        return texto.trim();
       }
     }
     return 'Texto não encontrado';
@@ -298,47 +298,57 @@ class _BibliaPageState extends State<BibliaPage> {
                       ),
                     ),
                   ),
+                  SizedBox(height: 20),
+
+                  // Texto, controle de slider e botões de ação
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      // Slider para controle do tamanho do texto
+                      Expanded(
+                        child: Row(
+                          children: [
+                            Icon(Icons.text_fields),
+                            Slider(
+                              value: _fontSize,
+                              min: 12.0,
+                              max: 32.0,
+                              onChanged: (double value) {
+                                setState(() {
+                                  _fontSize = value;
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      // Botões de compartilhamento e cópia
+                      Row(
+                        children: [
+                          IconButton(
+                            icon: Icon(Icons.share),
+                            onPressed: () => _shareText(_getTexto()),
+                          ),
+                          IconButton(
+                            icon: Icon(Icons.copy),
+                            onPressed: () => _copyText(_getTexto()),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
 
                   SizedBox(height: 20),
 
-                  // Exibe o texto da Bíblia
+                  // Texto bíblico com o tamanho ajustável
                   Expanded(
-                    child: Card(
-                      elevation: 4,
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: SingleChildScrollView(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Texto:',
-                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                              ),
-                              SizedBox(height: 10),
-                              SelectableText(
-                                _getTexto(),
-                                style: TextStyle(fontSize: _fontSize), 
-                              ),
-                            ],
-                          ),
-                        ),
+                    child: SingleChildScrollView(
+                      child: Text(
+                        _getTexto(),
+                        style: TextStyle(fontSize: _fontSize),
                       ),
                     ),
-                  ),
-                  // Botões de Compartilhar e Copiar
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      ElevatedButton(
-                        onPressed: () => _shareText(_getTexto()),
-                        child: Text('Compartilhar'),
-                      ),
-                      ElevatedButton(
-                        onPressed: () => _copyText(_getTexto()),
-                        child: Text('Copiar'),
-                      ),
-                    ],
                   ),
                 ],
               ),
