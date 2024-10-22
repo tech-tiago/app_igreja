@@ -9,13 +9,14 @@ class BibliaPage extends StatefulWidget {
 }
 
 class _BibliaPageState extends State<BibliaPage> {
-  List<dynamic>? bibliaData;
+  Map<String, dynamic>? bibliaData;
+  String? selectedTestamento = 'antigoTestamento'; // Novo: Armazena o testamento selecionado
   String? selectedNome;
   int? selectedCapitulo;
-  int? selectedVersiculoInicial; // Novo para versículo inicial
-  int? selectedVersiculoFinal; // Novo para versículo final
+  int? selectedVersiculoInicial; 
+  int? selectedVersiculoFinal; 
   bool isLoading = true;
-  double _fontSize = 16.0; // Variável para o tamanho da fonte
+  double _fontSize = 16.0; 
 
   @override
   void initState() {
@@ -29,11 +30,11 @@ class _BibliaPageState extends State<BibliaPage> {
       final data = json.decode(response);
 
       setState(() {
-        bibliaData = data['antigoTestamento'];
-        selectedNome = bibliaData!.first['nome'];
+        bibliaData = data; // Armazena ambos os testamentos
+        selectedNome = bibliaData![selectedTestamento!]!.first['nome'];
         selectedCapitulo = 1;
-        selectedVersiculoInicial = 1; // Inicializa versículo inicial
-        selectedVersiculoFinal = 10; // Inicializa versículo final
+        selectedVersiculoInicial = 1; 
+        selectedVersiculoFinal = 10; 
         isLoading = false;
       });
     } catch (error) {
@@ -44,9 +45,13 @@ class _BibliaPageState extends State<BibliaPage> {
     }
   }
 
+  List<dynamic> _getLivros() {
+    return bibliaData![selectedTestamento!]; // Retorna os livros do testamento selecionado
+  }
+
   List<int> _getCapitulos() {
     if (selectedNome != null) {
-      final livro = bibliaData!.firstWhere((livro) => livro['nome'] == selectedNome);
+      final livro = _getLivros().firstWhere((livro) => livro['nome'] == selectedNome);
       return List<int>.generate(
         livro['capitulos'].length,
         (index) => index + 1,
@@ -57,7 +62,7 @@ class _BibliaPageState extends State<BibliaPage> {
 
   List<int> _getVersiculos() {
     if (selectedNome != null && selectedCapitulo != null) {
-      final livro = bibliaData!.firstWhere((livro) => livro['nome'] == selectedNome);
+      final livro = _getLivros().firstWhere((livro) => livro['nome'] == selectedNome);
       final capitulos = livro['capitulos'];
       if (capitulos.isNotEmpty) {
         final versiculos = capitulos[selectedCapitulo! - 1]['versiculos'];
@@ -77,7 +82,7 @@ class _BibliaPageState extends State<BibliaPage> {
 
   String _getTexto() {
     if (selectedNome != null && selectedCapitulo != null) {
-      final livro = bibliaData!.firstWhere((livro) => livro['nome'] == selectedNome);
+      final livro = _getLivros().firstWhere((livro) => livro['nome'] == selectedNome);
       final capitulos = livro['capitulos'];
       if (capitulos.isNotEmpty) {
         final versiculos = capitulos[selectedCapitulo! - 1]['versiculos'];
@@ -104,216 +109,240 @@ class _BibliaPageState extends State<BibliaPage> {
     );
   }
 
-@override
-Widget build(BuildContext context) {
-  return Scaffold(
-    body: isLoading
-        ? Center(child: CircularProgressIndicator())
-        : Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Bloco de seleção de Livro, Capítulo e Versículo
-                Card(
-                  elevation: 4,
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      children: [
-                        // Linha com Livro e Capítulo
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Livro:',
-                                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16), // Tamanho fixo
-                                  ),
-                                  DropdownButton<String>(
-                                    isExpanded: true,
-                                    value: selectedNome,
-                                    items: bibliaData!.map<DropdownMenuItem<String>>((dynamic livro) {
-                                      return DropdownMenuItem<String>(
-                                        value: livro['nome'],
-                                        child: Text(
-                                          livro['nome'],
-                                          style: TextStyle(fontSize: 14), // Tamanho fixo
-                                        ),
-                                      );
-                                    }).toList(),
-                                    onChanged: (String? newValue) {
-                                      setState(() {
-                                        selectedNome = newValue!;
-                                        selectedCapitulo = 1;
-                                        selectedVersiculoInicial = 1;
-                                        selectedVersiculoFinal = 10;
-                                      });
-                                    },
-                                  ),
-                                ],
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: isLoading
+          ? Center(child: CircularProgressIndicator())
+          : Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Bloco de seleção de Testamento, Livro, Capítulo e Versículo
+                  Card(
+                    elevation: 4,
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        children: [
+                          // Testamento e Livro em uma linha
+                          Row(
+                            children: [
+                              // Testamento
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Testamento:',
+                                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                                    ),
+                                    DropdownButton<String>(
+                                      value: selectedTestamento,
+                                      items: <String>['antigoTestamento', 'novoTestamento']
+                                          .map<DropdownMenuItem<String>>((String value) {
+                                        return DropdownMenuItem<String>(
+                                          value: value,
+                                          child: Text(value == 'antigoTestamento' ? 'Antigo Testamento' : 'Novo Testamento'),
+                                        );
+                                      }).toList(),
+                                      onChanged: (String? newValue) {
+                                        setState(() {
+                                          selectedTestamento = newValue!;
+                                          selectedNome = bibliaData![selectedTestamento!]!.first['nome'];
+                                          selectedCapitulo = 1;
+                                          selectedVersiculoInicial = 1;
+                                          selectedVersiculoFinal = 10;
+                                        });
+                                      },
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
-                            SizedBox(width: 20),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [
-                                  Text(
-                                    'Capítulo:',
-                                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16), // Tamanho fixo
-                                  ),
-                                  DropdownButton<int>(
-                                    isExpanded: true,
-                                    value: selectedCapitulo,
-                                    items: _getCapitulos().map<DropdownMenuItem<int>>((int capitulo) {
-                                      return DropdownMenuItem<int>(
-                                        value: capitulo,
-                                        child: Text(
-                                          capitulo.toString(),
-                                          style: TextStyle(fontSize: 14), // Tamanho fixo
-                                        ),
-                                      );
-                                    }).toList(),
-                                    onChanged: (int? newValue) {
-                                      setState(() {
-                                        selectedCapitulo = newValue;
-                                        selectedVersiculoInicial = 1;
-                                        selectedVersiculoFinal = 10;
-                                      });
-                                    },
-                                  ),
-                                ],
+                              SizedBox(width: 20),
+                              // Livro
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Livro:',
+                                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                                    ),
+                                    DropdownButton<String>(
+                                      isExpanded: true,
+                                      value: selectedNome,
+                                      items: _getLivros().map<DropdownMenuItem<String>>((dynamic livro) {
+                                        return DropdownMenuItem<String>(
+                                          value: livro['nome'],
+                                          child: Text(
+                                            livro['nome'],
+                                            style: TextStyle(fontSize: 14),
+                                          ),
+                                        );
+                                      }).toList(),
+                                      onChanged: (String? newValue) {
+                                        setState(() {
+                                          selectedNome = newValue!;
+                                          selectedCapitulo = 1;
+                                          selectedVersiculoInicial = 1;
+                                          selectedVersiculoFinal = 10;
+                                        });
+                                      },
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 10),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Versículo:',
-                                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16), // Tamanho fixo
-                                  ),
-                                  DropdownButton<int>(
-                                    isExpanded: true,
-                                    value: selectedVersiculoInicial,
-                                    items: _getVersiculos().map<DropdownMenuItem<int>>((int versiculo) {
-                                      return DropdownMenuItem<int>(
-                                        value: versiculo,
-                                        child: Text(
-                                          versiculo.toString(),
-                                          style: TextStyle(fontSize: 14), // Tamanho fixo
-                                        ),
-                                      );
-                                    }).toList(),
-                                    onChanged: (int? newValue) {
-                                      setState(() {
-                                        selectedVersiculoInicial = newValue;
-                                      });
-                                    },
-                                  ),
-                                ],
-                              ),
-                            ),
-                            SizedBox(width: 20),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [
-                                  Text(
-                                    'até:',
-                                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16), // Tamanho fixo
-                                  ),
-                                  DropdownButton<int>(
-                                    isExpanded: true,
-                                    value: selectedVersiculoFinal,
-                                    items: _getVersiculos().map<DropdownMenuItem<int>>((int versiculo) {
-                                      return DropdownMenuItem<int>(
-                                        value: versiculo,
-                                        child: Text(
-                                          versiculo.toString(),
-                                          style: TextStyle(fontSize: 14), // Tamanho fixo
-                                        ),
-                                      );
-                                    }).toList(),
-                                    onChanged: (int? newValue) {
-                                      setState(() {
-                                        selectedVersiculoFinal = newValue;
-                                      });
-                                    },
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                SizedBox(height: 20),
+                            ],
+                          ),
+                          SizedBox(height: 20),
 
-                // Slider e ícones na mesma linha
-                Row(
-                  children: [
-                    // Slider para regular o tamanho da fonte
-                    Expanded(
-                      child: Slider(
-                        value: _fontSize,
-                        min: 10,
-                        max: 30,
-                        divisions: 20,
-                        label: _fontSize.round().toString(),
-                        onChanged: (double value) {
-                          setState(() {
-                            _fontSize = value; // Atualiza o tamanho da fonte
-                          });
-                        },
-                      ),
-                    ),
-                    IconButton(
-                      icon: Icon(Icons.share),
-                      onPressed: () => _shareText(_getTexto()),
-                    ),
-                    IconButton(
-                      icon: Icon(Icons.copy),
-                      onPressed: () => _copyText(_getTexto()),
-                    ),
-                  ],
-                ),
-
-                SizedBox(height: 20),
-
-                // Exibição do texto da passagem
-                Expanded(
-                  child: SingleChildScrollView(
-                    child: Container(
-                      padding: EdgeInsets.all(10),
-                      // decoration: BoxDecoration(
-                      //   border: Border.all(color: Colors.grey),
-                      //   borderRadius: BorderRadius.circular(10),
-                      // ),
-                      child: Text(
-                        _getTexto(),
-                        style: TextStyle(fontSize: _fontSize), // Tamanho da fonte afetado pelo slider
+                          // Linha com Capítulo, Versículo e Até
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Capítulo:',
+                                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                                    ),
+                                    DropdownButton<int>(
+                                      isExpanded: true,
+                                      value: selectedCapitulo,
+                                      items: _getCapitulos().map<DropdownMenuItem<int>>((int capitulo) {
+                                        return DropdownMenuItem<int>(
+                                          value: capitulo,
+                                          child: Text(
+                                            capitulo.toString(),
+                                            style: TextStyle(fontSize: 14),
+                                          ),
+                                        );
+                                      }).toList(),
+                                      onChanged: (int? newValue) {
+                                        setState(() {
+                                          selectedCapitulo = newValue;
+                                          selectedVersiculoInicial = 1;
+                                          selectedVersiculoFinal = 10;
+                                        });
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              SizedBox(width: 20),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Versículo:',
+                                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                                    ),
+                                    DropdownButton<int>(
+                                      isExpanded: true,
+                                      value: selectedVersiculoInicial,
+                                      items: _getVersiculos().map<DropdownMenuItem<int>>((int versiculo) {
+                                        return DropdownMenuItem<int>(
+                                          value: versiculo,
+                                          child: Text(
+                                            versiculo.toString(),
+                                            style: TextStyle(fontSize: 14),
+                                          ),
+                                        );
+                                      }).toList(),
+                                      onChanged: (int? newValue) {
+                                        setState(() {
+                                          selectedVersiculoInicial = newValue;
+                                        });
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              SizedBox(width: 20),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Até:',
+                                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                                    ),
+                                    DropdownButton<int>(
+                                      isExpanded: true,
+                                      value: selectedVersiculoFinal,
+                                      items: _getVersiculos().map<DropdownMenuItem<int>>((int versiculo) {
+                                        return DropdownMenuItem<int>(
+                                          value: versiculo,
+                                          child: Text(
+                                            versiculo.toString(),
+                                            style: TextStyle(fontSize: 14),
+                                          ),
+                                        );
+                                      }).toList(),
+                                      onChanged: (int? newValue) {
+                                        setState(() {
+                                          selectedVersiculoFinal = newValue;
+                                        });
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
                     ),
                   ),
-                ),
-              ],
+
+                  SizedBox(height: 20),
+
+                  // Exibe o texto da Bíblia
+                  Expanded(
+                    child: Card(
+                      elevation: 4,
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: SingleChildScrollView(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Texto:',
+                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                              ),
+                              SizedBox(height: 10),
+                              SelectableText(
+                                _getTexto(),
+                                style: TextStyle(fontSize: _fontSize), 
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  // Botões de Compartilhar e Copiar
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () => _shareText(_getTexto()),
+                        child: Text('Compartilhar'),
+                      ),
+                      ElevatedButton(
+                        onPressed: () => _copyText(_getTexto()),
+                        child: Text('Copiar'),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ),
-  );
-}
-
-
+    );
+  }
 }
