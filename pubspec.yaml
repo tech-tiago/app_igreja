@@ -47,3 +47,4 @@ flutter:
     - assets/images/load_img.png
     - assets/images/qrcode.png
     - assets/json/bibliaAveMaria.json
+    - assets/json/oracoes.json

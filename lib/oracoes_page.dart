@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:flutter/services.dart' show rootBundle;
 import 'dart:convert'; // Para decodificar JSON
 
 class OracoesPage extends StatefulWidget {
@@ -19,20 +19,13 @@ class _OracoesPageState extends State<OracoesPage> {
   }
 
   Future<void> _fetchOracoesData() async {
-    final String url =
-        'https://drive.google.com/uc?export=download&id=1bJfo9uwClo4XHkXntuUiAmcfGwER_Ynj';
-
     try {
-      final response = await http.get(Uri.parse(url));
-
-      if (response.statusCode == 200) {
-        setState(() {
-          oracoesData = json.decode(utf8.decode(response.bodyBytes)); // Decodifica o conteúdo JSON com UTF-8
-          isLoading = false;
-        });
-      } else {
-        throw Exception('Falha ao carregar as orações');
-      }
+      // Carrega o arquivo JSON local da pasta assets
+      String jsonString = await rootBundle.loadString('assets/json/oracoes.json');
+      setState(() {
+        oracoesData = json.decode(jsonString); // Decodifica o conteúdo JSON
+        isLoading = false;
+      });
     } catch (e) {
       setState(() {
         isLoading = false;
@@ -99,22 +92,6 @@ class _OracoesPageState extends State<OracoesPage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Center(child: Text('Oração não encontrada.')),
-                      IconButton(
-                        icon: Icon(Icons.zoom_in),
-                        onPressed: () {
-                          setState(() {
-                            _fontSize += 2;
-                          });
-                        },
-                      ),
-                      IconButton(
-                        icon: Icon(Icons.zoom_out),
-                        onPressed: () {
-                          setState(() {
-                            if (_fontSize > 12) _fontSize -= 2;
-                          });
-                        },
-                      ),
                     ],
                   ),
       ),
