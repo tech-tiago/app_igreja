@@ -59,7 +59,7 @@ class SobrePage extends StatelessWidget {
             Column(
               children: const [
                 Text(
-                  'Versão do aplicativo: 1.2.8',
+                  'Versão do aplicativo: 1.0.0',
                   style: TextStyle(
                     fontSize: 14,
                     color: Colors.grey,

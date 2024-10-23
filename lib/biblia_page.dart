@@ -144,7 +144,9 @@ class _BibliaPageState extends State<BibliaPage> {
                                           .map<DropdownMenuItem<String>>((String value) {
                                         return DropdownMenuItem<String>(
                                           value: value,
-                                          child: Text(value == 'antigoTestamento' ? 'Antigo Testamento' : 'Novo Testamento'),
+                                          child: Text(value == 'antigoTestamento' ? 'Antigo Testamento' : 'Novo Testamento',
+                                          style: TextStyle(fontSize: 14),
+                                          ),
                                         );
                                       }).toList(),
                                       onChanged: (String? newValue) {
@@ -201,6 +203,7 @@ class _BibliaPageState extends State<BibliaPage> {
                           // Linha com Capítulo, Versículo e Até
                           Row(
                             children: [
+                              // Primeiro select (Capítulo)
                               Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -233,6 +236,8 @@ class _BibliaPageState extends State<BibliaPage> {
                                 ),
                               ),
                               SizedBox(width: 20),
+
+                              // Segundo select (Versículo Inicial)
                               Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -263,37 +268,55 @@ class _BibliaPageState extends State<BibliaPage> {
                                 ),
                               ),
                               SizedBox(width: 20),
+
+                              // Último select 
                               Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(
-                                      'Até:',
-                                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                                    Opacity(
+                                      opacity: 0,
+                                      child: Text(
+                                        'Versículo:',
+                                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                                      ),
                                     ),
-                                    DropdownButton<int>(
-                                      isExpanded: true,
-                                      value: selectedVersiculoFinal,
-                                      items: _getVersiculos().map<DropdownMenuItem<int>>((int versiculo) {
-                                        return DropdownMenuItem<int>(
-                                          value: versiculo,
-                                          child: Text(
-                                            versiculo.toString(),
-                                            style: TextStyle(fontSize: 14),
+                                    Row(
+                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                      children: [
+                                        Text(
+                                          'a',
+                                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                                        ),
+                                        const SizedBox(width: 10), 
+                                        Expanded( 
+                                          child: DropdownButton<int>(
+                                            isExpanded: true,
+                                            value: selectedVersiculoFinal,
+                                            items: _getVersiculos().map<DropdownMenuItem<int>>((int versiculo) {
+                                              return DropdownMenuItem<int>(
+                                                value: versiculo,
+                                                child: Text(
+                                                  versiculo.toString(),
+                                                  style: TextStyle(fontSize: 14),
+                                                ),
+                                              );
+                                            }).toList(),
+                                            onChanged: (int? newValue) {
+                                              setState(() {
+                                                selectedVersiculoFinal = newValue;
+                                              });
+                                            },
                                           ),
-                                        );
-                                      }).toList(),
-                                      onChanged: (int? newValue) {
-                                        setState(() {
-                                          selectedVersiculoFinal = newValue;
-                                        });
-                                      },
+                                        ),
+                                      ],
                                     ),
                                   ],
                                 ),
                               ),
                             ],
                           ),
+
                         ],
                       ),
                     ),
