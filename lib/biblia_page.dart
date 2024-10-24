@@ -139,6 +139,7 @@ class _BibliaPageState extends State<BibliaPage> {
                                       style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                                     ),
                                     DropdownButton<String>(
+                                      isExpanded: true,
                                       value: selectedTestamento,
                                       items: <String>['antigoTestamento', 'novoTestamento']
                                           .map<DropdownMenuItem<String>>((String value) {
